@@ -56,6 +56,7 @@
     <ClCompile Include="$(CengineRoot)modules\routing\src\RouterInMemory.cpp" />
     <ClCompile Include="$(CengineRoot)modules\routing\src\SceneRepository.cpp" />
     <ClCompile Include="$(CengineRoot)modules\collision2d\src\Intersects.cpp" />
+    <ClCompile Include="$(CengineRoot)modules\input\src\Keyboard.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\src\AsteroidsForge\GPUCfg\gpu.cfg" />
@@ -108,7 +109,7 @@
     <ClCompile>
       <PrecompiledHeader>
       </PrecompiledHeader>
-      <AdditionalIncludeDirectories>$(TheForgeRoot);$(GameRoot)src;$(CengineRoot)core\include;$(CengineRoot)modules\routing\include;$(CengineRoot)modules\collision2d\include;$(CommonRoot)src\TheForgeCommon;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(TheForgeRoot);$(GameRoot)src;$(CengineRoot)core\include;$(CengineRoot)modules\routing\include;$(CengineRoot)modules\collision2d\include;$(CengineRoot)modules\input\include;$(CommonRoot)src\TheForgeCommon;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <!-- O The-Forge compila com /GR- e sem /EH, mas o jogo precisa dos dois:
            excecoes na cengine (factories validam colaboradores) e RTTI no

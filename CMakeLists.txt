@@ -28,7 +28,7 @@ include(FetchContent)
 FetchContent_Declare(
   cengine
   GIT_REPOSITORY https://github.com/mrmarmitt/cengine.git
-  GIT_TAG 0.7.1
+  GIT_TAG 0.8.0
 )
 
 # Sem a suite de testes da cengine (evita fetch do GoogleTest dela).
