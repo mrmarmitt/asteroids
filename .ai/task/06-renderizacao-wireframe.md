@@ -1,6 +1,6 @@
 # 06 - Renderizacao de verdade: wireframe vetorial
 
-- **Status:** in-progress (build verde; falta a validacao jogavel)
+- **Status:** done (2026-07-14 — validado jogando pelo usuario)
 - **Prioridade:** media - o jogo estava inteiro, mas desenhado com letras.
 - **Categoria:** Plataforma
 - **Depende de:** platform-theforge-common >= 0.2.0 (`forgeline`).
@@ -57,6 +57,6 @@ obvio do wrap.
 - [x] Build MSBuild verde (Release|x64); FSL compila os shaders de linha.
 - [x] Log limpo (pipeline sem SRT aceito pelo D3D12).
 - [x] Nenhum atlas, nenhuma arte: o batcher de sprites continua DESLIGADO.
-- [ ] Validacao jogavel: nave e rochas em wireframe, girando de verdade; a chama
+- [x] Validacao jogavel: nave e rochas em wireframe, girando de verdade; a chama
       aparece no thrust; objetos na borda aparecem inteiros dos dois lados; HUD
-      por cima.
+      por cima. (Validado em 2026-07-14.)

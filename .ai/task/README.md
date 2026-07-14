@@ -15,7 +15,7 @@ cengine 0.6.0 (owned/FlowRouter), cengine 0.7.x (collision2d) e common 0.2.0
 | 03 | [Asteroides + colisao](03-asteroides-e-colisao.md) | done | Dominio |
 | 04 | [Vidas, pontuacao e gameOver](04-vidas-pontuacao-gameover.md) | done | Dominio + Fluxo |
 | 05 | [Recordes](05-recordes.md) | done | Politica do jogo |
-| 06 | [Renderizacao wireframe](06-renderizacao-wireframe.md) | in-progress | Plataforma |
+| 06 | [Renderizacao wireframe](06-renderizacao-wireframe.md) | done | Plataforma |
 
 ## Backlog
 
