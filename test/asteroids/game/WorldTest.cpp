@@ -528,28 +528,43 @@ TEST(WorldTest, InvulnerableShipIgnoresAsteroids)
 
     advance(world, ast::World::kSpawnInvulnerability - 2 * kStep);
 
-    EXPECT_EQ(world.shipHits(), 0u) << "protegida: a rocha atravessa a nave";
+    EXPECT_EQ(world.lives(), ast::World::kInitialLives) << "protegida: a rocha atravessa a nave";
     EXPECT_EQ(world.asteroidCount(), 1u) << "e a rocha continua inteira";
 }
 
-TEST(WorldTest, AsteroidHittingTheShipRespawnsItAtTheCenter)
+namespace {
+
+// Uma arena onde a nave, acelerando, bate numa rocha parada logo a frente.
+// Devolve o World ja com a protecao inicial vencida.
+ast::World worldWithRockInTheShipsPath()
 {
     ast::World world{ ast::WorldConfig{ .spawnAsteroids = false } };
 
-    // Nave sobe; a rocha parada esta no caminho. Espera a protecao acabar.
     advance(world, ast::World::kSpawnInvulnerability + kStep);
-    ASSERT_FALSE(world.shipInvulnerable());
-
     world.addAsteroid({ ast::World::kArenaW * 0.5f, ast::World::kArenaH * 0.5f - 100.0f }, {},
                       ast::AsteroidSize::Large);
-
     world.setThrust(true);
-    for (int i = 0; i < 200 && world.shipHits() == 0; ++i)
+    return world;
+}
+
+// Roda ate a nave perder uma vida (ou desistir).
+void advanceUntilLifeLost(ast::World& world, const int livesBefore)
+{
+    for (int i = 0; i < 400 && world.lives() == livesBefore; ++i)
     {
         world.update(kStep);
     }
+}
 
-    ASSERT_EQ(world.shipHits(), 1u) << "a nave deveria ter batido na rocha";
+} // namespace
+
+TEST(WorldTest, AsteroidHittingTheShipRespawnsItAtTheCenter)
+{
+    ast::World world = worldWithRockInTheShipsPath();
+
+    advanceUntilLifeLost(world, ast::World::kInitialLives);
+
+    ASSERT_EQ(world.lives(), ast::World::kInitialLives - 1) << "a nave deveria ter batido na rocha";
 
     // Batida: volta ao centro, parada, apontando para cima e protegida.
     EXPECT_FLOAT_EQ(world.shipPosition().x, ast::World::kArenaW * 0.5f);
@@ -557,8 +572,126 @@ TEST(WorldTest, AsteroidHittingTheShipRespawnsItAtTheCenter)
     EXPECT_FLOAT_EQ(speedOf(world.shipVelocity()), 0.0f);
     EXPECT_FLOAT_EQ(world.shipAngle(), 0.0f);
     EXPECT_TRUE(world.shipInvulnerable());
+    EXPECT_TRUE(world.shipAlive());
 
     // A rocha tambem se parte na batida — senao a nave renasceria e a rocha
     // grande continuaria vindo em cima dela.
     EXPECT_EQ(countOfSize(world, ast::AsteroidSize::Medium), 2u);
+}
+
+// =============================================================================
+// Placar da partida: pontos, vidas e gameOver (task 04)
+// =============================================================================
+
+TEST(WorldTest, GameStartsWithFullLivesAndNoScore)
+{
+    const ast::World world;
+
+    EXPECT_EQ(world.lives(), ast::World::kInitialLives);
+    EXPECT_EQ(world.score(), 0);
+    EXPECT_EQ(world.outcome(), ast::World::Outcome::Playing);
+    EXPECT_TRUE(world.shipAlive());
+}
+
+TEST(WorldTest, ShootingARockScoresByItsSize)
+{
+    // Quanto menor a rocha, mais dificil de acertar e mais ela vale.
+    struct Case
+    {
+        ast::AsteroidSize size;
+        int               points;
+    };
+
+    for (const auto& [size, points] : { Case{ ast::AsteroidSize::Large, ast::World::kScoreLarge },
+                                        Case{ ast::AsteroidSize::Medium, ast::World::kScoreMedium },
+                                        Case{ ast::AsteroidSize::Small, ast::World::kScoreSmall } })
+    {
+        ast::World world = worldWithTargetAhead(size);
+
+        ASSERT_TRUE(world.fire());
+        advanceUntilShotGone(world);
+
+        EXPECT_EQ(world.score(), points) << "tamanho " << static_cast<int>(size);
+    }
+}
+
+TEST(WorldTest, RammingARockDoesNotScore)
+{
+    ast::World world = worldWithRockInTheShipsPath();
+
+    advanceUntilLifeLost(world, ast::World::kInitialLives);
+
+    ASSERT_EQ(world.lives(), ast::World::kInitialLives - 1);
+    EXPECT_EQ(world.score(), 0) << "bater na rocha a parte, mas premiar a batida seria absurdo";
+}
+
+TEST(WorldTest, RunningOutOfLivesEndsTheGame)
+{
+    ast::World world{ ast::WorldConfig{ .spawnAsteroids = false } };
+
+    for (int life = ast::World::kInitialLives; life > 0; --life)
+    {
+        ASSERT_EQ(world.outcome(), ast::World::Outcome::Playing) << "ainda restam " << life << " vidas";
+
+        // Espera a protecao do (re)nascimento passar e joga uma rocha em cima.
+        advance(world, ast::World::kSpawnInvulnerability + kStep);
+        world.addAsteroid(world.shipPosition(), {}, ast::AsteroidSize::Small);
+
+        advanceUntilLifeLost(world, life);
+        ASSERT_EQ(world.lives(), life - 1);
+    }
+
+    EXPECT_EQ(world.outcome(), ast::World::Outcome::GameOver);
+    EXPECT_EQ(world.lives(), 0);
+    EXPECT_FALSE(world.shipAlive()) << "sem vidas, a nave sai da arena";
+}
+
+TEST(WorldTest, GameOverFreezesTheSimulation)
+{
+    ast::World world{ ast::WorldConfig{ .spawnAsteroids = false } };
+
+    for (int life = ast::World::kInitialLives; life > 0; --life)
+    {
+        advance(world, ast::World::kSpawnInvulnerability + kStep);
+        world.addAsteroid(world.shipPosition(), {}, ast::AsteroidSize::Small);
+        advanceUntilLifeLost(world, life);
+    }
+
+    ASSERT_EQ(world.outcome(), ast::World::Outcome::GameOver);
+
+    const uint32_t rocks = world.asteroidCount();
+    const uint32_t wave = world.wave();
+
+    EXPECT_FALSE(world.fire()) << "sem nave, sem tiro";
+
+    world.setThrust(true);
+    advance(world, 2.0);
+
+    // A arena congela como estava: nada de ondas novas nascendo sozinhas atras
+    // da tela de game over.
+    EXPECT_EQ(world.asteroidCount(), rocks);
+    EXPECT_EQ(world.wave(), wave);
+    EXPECT_EQ(world.outcome(), ast::World::Outcome::GameOver);
+}
+
+TEST(WorldTest, CrossingTheScoreThresholdGrantsAnExtraLife)
+{
+    ast::World world{ ast::WorldConfig{ .spawnAsteroids = false } };
+
+    ASSERT_EQ(world.lives(), ast::World::kInitialLives);
+
+    // Destroi rochas pequenas (kScoreSmall cada) ate cruzar o limiar do bonus.
+    // A rocha nasce NA MIRA, nao em cima da nave — senao a nave morreria assim
+    // que a protecao inicial acabasse, e o teste mediria outra coisa.
+    const int needed = ast::World::kExtraLifeScore / ast::World::kScoreSmall;
+    for (int i = 0; i < needed; ++i)
+    {
+        world.addAsteroid({ world.shipPosition().x, world.shipPosition().y - 120.0f }, {}, ast::AsteroidSize::Small);
+        ASSERT_TRUE(world.fire()) << "tiro " << i;
+        advanceUntilShotGone(world);
+        advance(world, ast::World::kFireCooldown);
+    }
+
+    EXPECT_EQ(world.score(), ast::World::kExtraLifeScore);
+    EXPECT_EQ(world.lives(), ast::World::kInitialLives + 1) << "o bonus ship do arcade";
 }

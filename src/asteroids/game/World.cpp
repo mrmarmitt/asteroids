@@ -37,6 +37,12 @@ float World::asteroidRadius(const AsteroidSize size)
     return kRadius[static_cast<size_t>(size)];
 }
 
+int World::scoreFor(const AsteroidSize size)
+{
+    constexpr int kScore[] = { kScoreLarge, kScoreMedium, kScoreSmall };
+    return kScore[static_cast<size_t>(size)];
+}
+
 World::World(const WorldConfig config): m_config(config), m_rng(config.seed)
 {
     if (m_config.spawnAsteroids)
@@ -67,7 +73,7 @@ Vec2 World::shipHeading() const
 
 bool World::fire()
 {
-    if (m_shotCount >= kMaxShots || m_fireCooldown > 0.0)
+    if (m_outcome == Outcome::GameOver || m_shotCount >= kMaxShots || m_fireCooldown > 0.0)
     {
         return false;
     }
@@ -96,8 +102,11 @@ bool World::fire()
 
 void World::update(const double dt)
 {
-    if (dt <= 0.0)
+    if (dt <= 0.0 || m_outcome == Outcome::GameOver)
     {
+        // Partida encerrada: a arena congela como estava. A cena le o outcome e
+        // roteia para o gameOver — quem decide o que a derrota SIGNIFICA e o
+        // fluxo do jogo, nao o World.
         return;
     }
 
@@ -202,6 +211,7 @@ void World::collideShotsWithAsteroids()
                 continue;
             }
 
+            award(m_asteroidSize[asteroid]); // antes de partir: o tamanho e o que vale
             splitAsteroid(asteroid);
             removeShot(shot);
             break; // o tiro morreu: nao ha o que testar contra as outras rochas
@@ -227,12 +237,39 @@ void World::collideShipWithAsteroids()
         }
 
         // A rocha tambem se parte na batida — senao a nave renasceria dentro
-        // dela e o jogador perderia tudo de uma vez.
+        // dela e o jogador perderia tudo de uma vez. Mas NAO pontua: seria
+        // premiar a batida.
         splitAsteroid(asteroid);
-        ++m_shipHits;
-        respawnShip();
+        loseLife();
         return; // uma batida por quadro basta: a nave ja saiu de la
     }
+}
+
+void World::award(const AsteroidSize destroyed)
+{
+    m_score += scoreFor(destroyed);
+
+    // Vida extra do arcade. `while` (e nao `if`) porque um unico tiro pode, em
+    // teoria, cruzar mais de um limiar se as constantes mudarem.
+    while (m_score >= m_nextExtraLife)
+    {
+        ++m_lives;
+        m_nextExtraLife += kExtraLifeScore;
+    }
+}
+
+void World::loseLife()
+{
+    --m_lives;
+
+    if (m_lives <= 0)
+    {
+        m_lives = 0;
+        m_outcome = Outcome::GameOver;
+        return; // sem renascer: a nave sai da arena
+    }
+
+    respawnShip();
 }
 
 bool World::circlesOverlap(const Vec2 a, const float radiusA, const Vec2 b, const float radiusB)

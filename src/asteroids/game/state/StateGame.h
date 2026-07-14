@@ -8,9 +8,10 @@
 #include "asteroids/game/GameRouter.h"
 #include "StateGameFlow.h"
 
-// Fluxo do Asteroids (bootstrap — task 01):
+// Fluxo do Asteroids (task 04):
 //
-//   initial (splash) -> menu -> game -> menu (ESC abandona)
+//   initial (splash) -> menu -> game -> gameOver -> menu
+//                        |        \--> menu (ESC abandona)      \--> game (de novo)
 //                        \--> exit
 //
 // Codigos de estado = chaves das factories de cena (ForgeSceneFactory).
@@ -25,6 +26,7 @@ public:
 
     void menu(const GameRouter& game) const override; // unica transicao valida
     void game(const GameRouter&) const override {}
+    void gameOver(const GameRouter&) const override {}
     void exit(const GameRouter&) const override {}
 };
 
@@ -36,6 +38,7 @@ public:
 
     void menu(const GameRouter&) const override {}
     void game(const GameRouter& game) const override;
+    void gameOver(const GameRouter&) const override {}
     void exit(const GameRouter& game) const override;
 };
 
@@ -47,6 +50,19 @@ public:
 
     void menu(const GameRouter& game) const override; // abandono via ESC
     void game(const GameRouter&) const override {}
+    void gameOver(const GameRouter& game) const override; // acabaram as vidas
+    void exit(const GameRouter&) const override {}
+};
+
+class GameOverSG final: public StateGameFlow
+{
+public:
+    [[nodiscard]] std::string getCode() const override { return "gameover"; }
+    [[nodiscard]] std::string getName() const override { return "Game Over"; }
+
+    void menu(const GameRouter& game) const override;
+    void game(const GameRouter& game) const override; // jogar de novo (partida zerada)
+    void gameOver(const GameRouter&) const override {}
     void exit(const GameRouter&) const override {}
 };
 
@@ -58,6 +74,7 @@ public:
 
     void menu(const GameRouter&) const override {}
     void game(const GameRouter&) const override {}
+    void gameOver(const GameRouter&) const override {}
     void exit(const GameRouter&) const override {}
 };
 
@@ -67,3 +84,7 @@ inline void MenuSG::game(const GameRouter& game) const { game.setNextState(std::
 inline void MenuSG::exit(const GameRouter& game) const { game.setNextState(std::make_unique<ExitSG>()); }
 
 inline void GameSG::menu(const GameRouter& game) const { game.setNextState(std::make_unique<MenuSG>()); }
+inline void GameSG::gameOver(const GameRouter& game) const { game.setNextState(std::make_unique<GameOverSG>()); }
+
+inline void GameOverSG::menu(const GameRouter& game) const { game.setNextState(std::make_unique<MenuSG>()); }
+inline void GameOverSG::game(const GameRouter& game) const { game.setNextState(std::make_unique<GameSG>()); }

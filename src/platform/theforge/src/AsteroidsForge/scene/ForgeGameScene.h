@@ -8,19 +8,26 @@
 #include "asteroids/game/World.h"
 
 class GameRouter;
+class PlaySession;
 
-// O estado "game" (task 02): a cena e so a casca — traduz o input segurado em
-// comandos do World, chama update(dt) com o passo fixo do engine e desenha
-// lendo as consultas. Nenhuma regra de jogo mora aqui.
+// O estado "game": a cena e so a casca — traduz o input segurado em comandos do
+// World, chama update(dt) com o passo fixo do engine e desenha lendo as
+// consultas. Nenhuma regra de jogo mora aqui.
+//
+// A cena e recriada a cada visita (factory lazy do SceneRepository), entao o
+// World nasce zerado de graca — "jogar de novo" e uma partida nova de verdade.
+// Ao acabarem as vidas, a cena publica o resultado no PlaySession (que sobrevive
+// a troca de estado) e roteia para o gameOver.
 //
 // Desenho ainda por TEXTO (o batcher de sprites segue desligado): a nave e um
-// triangulo de pontos rotacionado pelo angulo do World — o suficiente para
-// validar rotacao, inercia e wrap-around de olho, sem decidir ainda como o
-// asteroids sera renderizado de verdade (ver task 03).
+// triangulo de pontos rotacionado pelo angulo do World e as rochas sao aneis de
+// pontos — o suficiente para jogar, sem decidir ainda como o asteroids sera
+// renderizado de verdade (ver task 02).
 class ForgeGameScene final: public cengine::core::IScene
 {
-    std::shared_ptr<GameRouter> m_gameRouter;
-    ast::World                  m_world;
+    std::shared_ptr<GameRouter>  m_gameRouter;
+    std::shared_ptr<PlaySession> m_session;
+    ast::World                   m_world;
 
     /// Relogio so de apresentacao (pisca-pisca da nave protegida) — nao entra
     /// na simulacao.
@@ -30,7 +37,7 @@ class ForgeGameScene final: public cengine::core::IScene
     [[nodiscard]] ast::Vec2 toScreen(ast::Vec2 point) const;
 
 public:
-    explicit ForgeGameScene(std::shared_ptr<GameRouter> gameRouter);
+    ForgeGameScene(std::shared_ptr<GameRouter> gameRouter, std::shared_ptr<PlaySession> session);
 
     void onEnter() override {}
     void update(cengine::core::Seconds dt) override;

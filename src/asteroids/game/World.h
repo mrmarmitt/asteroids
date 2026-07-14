@@ -59,8 +59,30 @@ struct WorldConfig
 class World
 {
 public:
+    /// A partida acabou quando as vidas acabam. Quem decide o que fazer com
+    /// isso e a cena (rotear para o gameOver) — o World so constata.
+    enum class Outcome : uint8_t
+    {
+        Playing,
+        GameOver,
+    };
+
     static constexpr float kArenaW = 800.0f;
     static constexpr float kArenaH = 600.0f;
+
+    // --- partida ---
+    static constexpr int kInitialLives = 3;
+
+    /// Pontos por rocha destruida A TIRO (bater nela nao pontua). Valores do
+    /// arcade: quanto menor a rocha, mais dificil de acertar, mais vale.
+    static constexpr int kScoreLarge = 20;
+    static constexpr int kScoreMedium = 50;
+    static constexpr int kScoreSmall = 100;
+
+    /// Vida extra a cada tantos pontos (o "bonus ship" do arcade).
+    static constexpr int kExtraLifeScore = 10000;
+
+    [[nodiscard]] static int scoreFor(AsteroidSize size);
 
     static constexpr uint32_t kMaxShots = 4; // regra do arcade: poucos tiros em voo
 
@@ -117,9 +139,14 @@ public:
     /// Nave intocavel logo apos (re)nascer — a cena pisca a nave enquanto dura.
     [[nodiscard]] bool shipInvulnerable() const { return m_invulnerability > 0.0; }
 
-    /// Quantas vezes a nave foi atingida. Vidas/gameOver sao da task 04; por
-    /// ora isto e so o contador que prova que a colisao nave x rocha acontece.
-    [[nodiscard]] uint32_t shipHits() const { return m_shipHits; }
+    // --- placar da partida ---
+    [[nodiscard]] Outcome outcome() const { return m_outcome; }
+    [[nodiscard]] int     score() const { return m_score; }
+    [[nodiscard]] int     lives() const { return m_lives; }
+
+    /// A nave so existe enquanto ha vida. No gameOver ela sai da arena — a cena
+    /// nao deve desenha-la.
+    [[nodiscard]] bool shipAlive() const { return m_outcome == Outcome::Playing; }
 
     /// Versor da proa — a cena desenha a nave com ele, os testes conferem a
     /// direcao do thrust e do tiro sem redescobrir a convencao de angulo.
@@ -170,7 +197,15 @@ private:
     void spawnWave();
 
     /// Parte a rocha em dois fragmentos menores (ou some, se ja era pequena).
+    /// NAO pontua: quem pontua e o tiro (bater na rocha tambem a parte, e nao
+    /// seria justo premiar a batida).
     void splitAsteroid(uint32_t index);
+
+    /// Pontua e, se cruzou o limiar, da a vida extra do arcade.
+    void award(AsteroidSize destroyed);
+
+    /// Tira uma vida; sem vidas, a partida acaba.
+    void loseLife();
     void removeAsteroid(uint32_t index);
     void removeShot(uint32_t index);
     void respawnShip();
@@ -194,7 +229,11 @@ private:
     bool   m_thrusting = false;
     double m_fireCooldown = 0.0;
     double m_invulnerability = kSpawnInvulnerability;
-    uint32_t m_shipHits = 0;
+
+    Outcome m_outcome = Outcome::Playing;
+    int     m_score = 0;
+    int     m_lives = kInitialLives;
+    int     m_nextExtraLife = kExtraLifeScore;
 
     uint32_t m_shotCount = 0;
     Vec2     m_shotPos[kMaxShots] = {};

@@ -18,5 +18,6 @@ public:
     // As transicoes despacham sobre o estado ATUAL do router.
     void menu() const { current().menu(*this); }
     void game() const { current().game(*this); }
+    void gameOver() const { current().gameOver(*this); }
     void exit() const { current().exit(*this); }
 };

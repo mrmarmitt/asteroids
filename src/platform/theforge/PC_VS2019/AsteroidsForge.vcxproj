@@ -41,6 +41,7 @@
     <ClCompile Include="..\src\AsteroidsForge\scene\ForgeSplashScene.cpp" />
     <ClCompile Include="..\src\AsteroidsForge\scene\ForgeMenuScene.cpp" />
     <ClCompile Include="..\src\AsteroidsForge\scene\ForgeGameScene.cpp" />
+    <ClCompile Include="..\src\AsteroidsForge\scene\ForgeGameOverScene.cpp" />
     <!-- dominio do jogo (C++ puro; o mesmo World que a suite CMake exercita —
          GameRouter/estados seguem header-only) -->
     <ClCompile Include="$(GameRoot)src\asteroids\game\World.cpp" />

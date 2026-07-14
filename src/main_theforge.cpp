@@ -32,6 +32,7 @@
 #include <cengine/routing/SceneRepository.hpp>
 
 #include "asteroids/game/GameRouter.h"
+#include "asteroids/game/service/PlaySession.h"
 #include "asteroids/game/state/StateGame.h"
 
 #include "platform/theforge/src/AsteroidsForge/ForgeSceneFactory.h"
@@ -84,7 +85,11 @@ int main()
 
         const auto gameRouter = std::make_shared<GameRouter>(router);
 
-        ForgeSceneFactory::populateForgeScenes(sceneRepositoryRef, gameRouter);
+        // O resultado da partida atravessa a troca de cena (o World morre com a
+        // cena do jogo); o PlaySession e quem sobrevive para o gameOver ler.
+        const auto session = std::make_shared<PlaySession>();
+
+        ForgeSceneFactory::populateForgeScenes(sceneRepositoryRef, gameRouter, session);
 
         // Casco do common: fonte do The-Forge, batcher de sprites DESLIGADO
         // (atlasPath nulo — casco so de texto neste degrau) e o preto-espaco

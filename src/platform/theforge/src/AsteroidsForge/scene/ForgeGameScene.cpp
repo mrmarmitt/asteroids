@@ -5,6 +5,7 @@
 #include <utility>
 
 #include "asteroids/game/GameRouter.h"
+#include "asteroids/game/service/PlaySession.h"
 
 #include "ForgeUi.h"
 
@@ -49,7 +50,10 @@ void drawDot(const ast::Vec2 screen, const float size, const uint32_t color)
 
 } // namespace
 
-ForgeGameScene::ForgeGameScene(std::shared_ptr<GameRouter> gameRouter): m_gameRouter(std::move(gameRouter)) {}
+ForgeGameScene::ForgeGameScene(std::shared_ptr<GameRouter> gameRouter, std::shared_ptr<PlaySession> session)
+    : m_gameRouter(std::move(gameRouter)), m_session(std::move(session))
+{
+}
 
 ast::Vec2 ForgeGameScene::toScreen(const ast::Vec2 point) const
 {
@@ -81,6 +85,15 @@ void ForgeGameScene::update(const cengine::core::Seconds dt)
 {
     m_world.update(dt.count());
     m_elapsed += dt.count();
+
+    // Acabaram as vidas: o World so CONSTATA; quem decide o que a derrota
+    // significa e o fluxo. Publica o resultado (o World morre com a cena) e
+    // roteia.
+    if (m_world.outcome() == ast::World::Outcome::GameOver)
+    {
+        m_session->setResult(m_world.score(), m_world.wave());
+        m_gameRouter->gameOver();
+    }
 }
 
 void ForgeGameScene::draw()
@@ -107,9 +120,9 @@ void ForgeGameScene::draw()
     const ast::Vec2 shipPos = m_world.shipPosition();
     const float     angle = m_world.shipAngle();
 
-    // Protegida logo apos (re)nascer: pisca, como no arcade.
+    // Protegida logo apos (re)nascer: pisca, como no arcade. Sem vidas, some.
     const bool blinkOff = m_world.shipInvulnerable() && std::fmod(m_elapsed, 0.24) < 0.12;
-    if (!blinkOff)
+    if (m_world.shipAlive() && !blinkOff)
     {
         for (const ast::Vec2 vertex : kShipShape)
         {
@@ -129,10 +142,22 @@ void ForgeGameScene::draw()
         drawDot(toScreen(m_world.shotPosition(i)), 14.0f, forgeui::color::kValue);
     }
 
-    char hud[80] = {};
-    std::snprintf(hud, sizeof(hud), "ONDA %u   ROCHAS %u   BATIDAS %u", m_world.wave(), m_world.asteroidCount(),
-                  m_world.shipHits());
-    forgeui::drawText(hud, 24.0f, 24.0f, 18.0f, forgeui::color::kDim);
+    // HUD: pontos a esquerda, vidas em naves (como no arcade), onda a direita.
+    char score[32] = {};
+    std::snprintf(score, sizeof(score), "%06d", m_world.score());
+    forgeui::drawText(score, 24.0f, 24.0f, 24.0f, forgeui::color::kValue);
+
+    std::string ships;
+    for (int i = 0; i < m_world.lives(); ++i)
+    {
+        ships += "^ ";
+    }
+    forgeui::drawText(ships, 24.0f, 56.0f, 22.0f, forgeui::color::kSuccess);
+
+    char wave[32] = {};
+    std::snprintf(wave, sizeof(wave), "ONDA %u", m_world.wave());
+    forgeui::drawText(wave, forgeui::screenWidth() - forgeui::textWidth(wave, 18.0f) - 24.0f, 24.0f, 18.0f,
+                      forgeui::color::kDim);
 
     forgeui::drawHints("SETAS <- -> girar   SETA CIMA acelerar   ESPACO atirar   ESC voltar ao menu");
 }
