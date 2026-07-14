@@ -20,6 +20,17 @@ constexpr ast::Vec2 kShipShape[] = {
 };
 constexpr ast::Vec2 kThrustFlame = { 0.0f, 13.0f }; // atras da nave
 
+constexpr float kTwoPi = 6.28318530718f;
+
+// O World mantem os CENTROS dentro da arena, mas a borda de uma rocha pode
+// passar dela — e essa borda tem de aparecer do outro lado, como o corpo.
+ast::Vec2 wrapToArena(ast::Vec2 point)
+{
+    point.x = std::fmod(point.x + ast::World::kArenaW, ast::World::kArenaW);
+    point.y = std::fmod(point.y + ast::World::kArenaH, ast::World::kArenaH);
+    return point;
+}
+
 // Roda um ponto local pelo angulo da nave (mesma convencao do World: 0 = -Y,
 // crescendo no sentido horario na tela).
 ast::Vec2 rotate(const ast::Vec2 point, const float angle)
@@ -69,23 +80,48 @@ void ForgeGameScene::input()
 void ForgeGameScene::update(const cengine::core::Seconds dt)
 {
     m_world.update(dt.count());
+    m_elapsed += dt.count();
 }
 
 void ForgeGameScene::draw()
 {
+    // Rochas: um anel de pontos com o raio que o World diz — ainda sem sprite
+    // nenhum (a escolha do renderizador segue adiada; ver task 02).
+    for (uint32_t i = 0; i < m_world.asteroidCount(); ++i)
+    {
+        const ast::Vec2 center = m_world.asteroidPosition(i);
+        const float     radius = ast::World::asteroidRadius(m_world.asteroidSize(i));
+        const uint32_t  points = radius > 30.0f ? 12u : (radius > 15.0f ? 8u : 6u);
+
+        for (uint32_t p = 0; p < points; ++p)
+        {
+            const float angle = kTwoPi * static_cast<float>(p) / static_cast<float>(points);
+            const ast::Vec2 rim = rotate({ 0.0f, -radius }, angle);
+
+            // O anel pode atravessar a borda: passa pelo wrap do World para o
+            // pedaco que sai por um lado aparecer no outro, como a rocha.
+            drawDot(toScreen(wrapToArena({ center.x + rim.x, center.y + rim.y })), 12.0f, forgeui::color::kDim);
+        }
+    }
+
     const ast::Vec2 shipPos = m_world.shipPosition();
     const float     angle = m_world.shipAngle();
 
-    for (const ast::Vec2 vertex : kShipShape)
+    // Protegida logo apos (re)nascer: pisca, como no arcade.
+    const bool blinkOff = m_world.shipInvulnerable() && std::fmod(m_elapsed, 0.24) < 0.12;
+    if (!blinkOff)
     {
-        const ast::Vec2 local = rotate(vertex, angle);
-        drawDot(toScreen({ shipPos.x + local.x, shipPos.y + local.y }), 20.0f, forgeui::color::kSuccess);
-    }
+        for (const ast::Vec2 vertex : kShipShape)
+        {
+            const ast::Vec2 local = rotate(vertex, angle);
+            drawDot(toScreen({ shipPos.x + local.x, shipPos.y + local.y }), 20.0f, forgeui::color::kSuccess);
+        }
 
-    if (m_world.thrusting())
-    {
-        const ast::Vec2 local = rotate(kThrustFlame, angle);
-        drawDot(toScreen({ shipPos.x + local.x, shipPos.y + local.y }), 16.0f, forgeui::color::kAccent);
+        if (m_world.thrusting())
+        {
+            const ast::Vec2 local = rotate(kThrustFlame, angle);
+            drawDot(toScreen({ shipPos.x + local.x, shipPos.y + local.y }), 16.0f, forgeui::color::kAccent);
+        }
     }
 
     for (uint32_t i = 0; i < m_world.shotCount(); ++i)
@@ -93,11 +129,9 @@ void ForgeGameScene::draw()
         drawDot(toScreen(m_world.shotPosition(i)), 14.0f, forgeui::color::kValue);
     }
 
-    const ast::Vec2 velocity = m_world.shipVelocity();
-    const float     speed = std::sqrt(velocity.x * velocity.x + velocity.y * velocity.y);
-
-    char hud[64] = {};
-    std::snprintf(hud, sizeof(hud), "ANG %3.0f   VEL %3.0f", angle * 57.2957795f, speed);
+    char hud[80] = {};
+    std::snprintf(hud, sizeof(hud), "ONDA %u   ROCHAS %u   BATIDAS %u", m_world.wave(), m_world.asteroidCount(),
+                  m_world.shipHits());
     forgeui::drawText(hud, 24.0f, 24.0f, 18.0f, forgeui::color::kDim);
 
     forgeui::drawHints("SETAS <- -> girar   SETA CIMA acelerar   ESPACO atirar   ESC voltar ao menu");

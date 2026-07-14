@@ -22,6 +22,10 @@ class ForgeGameScene final: public cengine::core::IScene
     std::shared_ptr<GameRouter> m_gameRouter;
     ast::World                  m_world;
 
+    /// Relogio so de apresentacao (pisca-pisca da nave protegida) — nao entra
+    /// na simulacao.
+    double m_elapsed = 0.0;
+
     /// Projeta um ponto da arena do World (800x600) para pixels da tela.
     [[nodiscard]] ast::Vec2 toScreen(ast::Vec2 point) const;
 

@@ -4,8 +4,8 @@
 
 #include "asteroids/game/World.h"
 
-// A simulacao da nave (task 02). Os testes dirigem o World do mesmo jeito que
-// a cena: comandos -> update(dt fixo) -> consultas. Nada de plataforma aqui.
+// A simulacao da partida. Os testes dirigem o World do mesmo jeito que a cena:
+// comandos -> update(dt fixo) -> consultas. Nada de plataforma aqui.
 
 namespace {
 
@@ -25,11 +25,36 @@ float speedOf(const ast::Vec2 v)
     return std::sqrt(v.x * v.x + v.y * v.y);
 }
 
+// Arena vazia: os testes da NAVE (task 02) nao querem rochas se metendo no
+// caminho — nem batendo nela, nem sendo atingidas pelos tiros dela.
+ast::World shipOnlyWorld(const bool shotsInheritShipVelocity = true)
+{
+    return ast::World{ ast::WorldConfig{ .shotsInheritShipVelocity = shotsInheritShipVelocity,
+                                         .spawnAsteroids = false } };
+}
+
+uint32_t countOfSize(const ast::World& world, const ast::AsteroidSize size)
+{
+    uint32_t total = 0;
+    for (uint32_t i = 0; i < world.asteroidCount(); ++i)
+    {
+        if (world.asteroidSize(i) == size)
+        {
+            ++total;
+        }
+    }
+    return total;
+}
+
 } // namespace
+
+// =============================================================================
+// A nave (task 02)
+// =============================================================================
 
 TEST(WorldTest, ShipStartsCenteredStoppedAndPointingUp)
 {
-    const ast::World world;
+    const ast::World world = shipOnlyWorld();
 
     EXPECT_FLOAT_EQ(world.shipPosition().x, ast::World::kArenaW * 0.5f);
     EXPECT_FLOAT_EQ(world.shipPosition().y, ast::World::kArenaH * 0.5f);
@@ -43,7 +68,7 @@ TEST(WorldTest, ShipStartsCenteredStoppedAndPointingUp)
 
 TEST(WorldTest, ShipDoesNotDriftWithoutThrust)
 {
-    ast::World world;
+    ast::World world = shipOnlyWorld();
 
     advance(world, 2.0);
 
@@ -53,7 +78,7 @@ TEST(WorldTest, ShipDoesNotDriftWithoutThrust)
 
 TEST(WorldTest, RotationAxisTurnsTheShipInBothDirections)
 {
-    ast::World world;
+    ast::World world = shipOnlyWorld();
 
     // Um quarto de volta para a direita (horario na tela): proa aponta para +X.
     world.setRotationAxis(1.0f);
@@ -72,7 +97,7 @@ TEST(WorldTest, RotationAxisTurnsTheShipInBothDirections)
 
 TEST(WorldTest, AngleStaysNormalizedAfterManyTurns)
 {
-    ast::World world;
+    ast::World world = shipOnlyWorld();
 
     world.setRotationAxis(1.0f);
     advance(world, 20.0); // varias voltas completas
@@ -83,7 +108,7 @@ TEST(WorldTest, AngleStaysNormalizedAfterManyTurns)
 
 TEST(WorldTest, ThrustAcceleratesAlongTheHeading)
 {
-    ast::World world;
+    ast::World world = shipOnlyWorld();
 
     world.setThrust(true);
     advance(world, 0.5);
@@ -97,7 +122,7 @@ TEST(WorldTest, ThrustAcceleratesAlongTheHeading)
 
 TEST(WorldTest, ShipKeepsMovingAfterThrustReleasedButDragSlowsItDown)
 {
-    ast::World world;
+    ast::World world = shipOnlyWorld();
 
     world.setThrust(true);
     advance(world, 0.5);
@@ -118,7 +143,7 @@ TEST(WorldTest, ShipKeepsMovingAfterThrustReleasedButDragSlowsItDown)
 
 TEST(WorldTest, SpeedSaturatesAtMaxSpeed)
 {
-    ast::World world;
+    ast::World world = shipOnlyWorld();
 
     world.setThrust(true);
     advance(world, 30.0); // muito alem do tempo necessario para saturar
@@ -128,7 +153,7 @@ TEST(WorldTest, SpeedSaturatesAtMaxSpeed)
 
 TEST(WorldTest, ShipWrapsAroundTheArenaEdges)
 {
-    ast::World world;
+    ast::World world = shipOnlyWorld();
 
     // Sobe (proa para cima) ate cruzar a borda de cima: reaparece embaixo.
     world.setThrust(true);
@@ -141,7 +166,7 @@ TEST(WorldTest, ShipWrapsAroundTheArenaEdges)
 
 TEST(WorldTest, FireSpawnsShotAtTheShipMovingForward)
 {
-    ast::World world{ ast::WorldConfig{ .shotsInheritShipVelocity = false } };
+    ast::World world = shipOnlyWorld(false);
 
     ASSERT_TRUE(world.fire());
     ASSERT_EQ(world.shotCount(), 1u);
@@ -158,7 +183,7 @@ TEST(WorldTest, FireSpawnsShotAtTheShipMovingForward)
 
 TEST(WorldTest, FireRespectsCooldown)
 {
-    ast::World world;
+    ast::World world = shipOnlyWorld();
 
     EXPECT_TRUE(world.fire());
     EXPECT_FALSE(world.fire()) << "segundo tiro no mesmo quadro deveria bater no cooldown";
@@ -170,7 +195,7 @@ TEST(WorldTest, FireRespectsCooldown)
 
 TEST(WorldTest, FireIsCappedAtMaxShotsInFlight)
 {
-    ast::World world;
+    ast::World world = shipOnlyWorld();
 
     for (uint32_t i = 0; i < ast::World::kMaxShots; ++i)
     {
@@ -184,7 +209,7 @@ TEST(WorldTest, FireIsCappedAtMaxShotsInFlight)
 
 TEST(WorldTest, ShotsExpireAfterTheirLifetime)
 {
-    ast::World world;
+    ast::World world = shipOnlyWorld();
 
     ASSERT_TRUE(world.fire());
     ASSERT_EQ(world.shotCount(), 1u);
@@ -196,7 +221,7 @@ TEST(WorldTest, ShotsExpireAfterTheirLifetime)
 
 TEST(WorldTest, ShotsWrapAroundTheArenaEdges)
 {
-    ast::World world{ ast::WorldConfig{ .shotsInheritShipVelocity = false } };
+    ast::World world = shipOnlyWorld(false);
 
     ASSERT_TRUE(world.fire()); // sobe a partir do centro
 
@@ -212,8 +237,8 @@ TEST(WorldTest, ShotsWrapAroundTheArenaEdges)
 
 TEST(WorldTest, ShotsInheritShipVelocityWhenConfigured)
 {
-    ast::World fast;   // herda (padrao)
-    ast::World steady{ ast::WorldConfig{ .shotsInheritShipVelocity = false } };
+    ast::World fast = shipOnlyWorld(true);
+    ast::World steady = shipOnlyWorld(false);
 
     for (ast::World* world : { &fast, &steady })
     {
@@ -237,8 +262,8 @@ TEST(WorldTest, ShotsInheritShipVelocityWhenConfigured)
 
 TEST(WorldTest, RotationAxisIsClamped)
 {
-    ast::World clamped;
-    ast::World normal;
+    ast::World clamped = shipOnlyWorld();
+    ast::World normal = shipOnlyWorld();
 
     clamped.setRotationAxis(50.0f); // input maluco de uma cena
     normal.setRotationAxis(1.0f);
@@ -251,7 +276,7 @@ TEST(WorldTest, RotationAxisIsClamped)
 
 TEST(WorldTest, NonPositiveDtDoesNothing)
 {
-    ast::World world;
+    ast::World world = shipOnlyWorld();
 
     world.setThrust(true);
     world.update(0.0);
@@ -260,4 +285,280 @@ TEST(WorldTest, NonPositiveDtDoesNothing)
     EXPECT_FLOAT_EQ(speedOf(world.shipVelocity()), 0.0f);
     EXPECT_FLOAT_EQ(world.shipPosition().x, ast::World::kArenaW * 0.5f);
     EXPECT_FLOAT_EQ(world.shipPosition().y, ast::World::kArenaH * 0.5f);
+}
+
+// =============================================================================
+// As rochas (task 03)
+// =============================================================================
+
+TEST(WorldTest, FirstWaveSpawnsLargeAsteroidsAwayFromTheShip)
+{
+    const ast::World world;
+
+    EXPECT_EQ(world.wave(), 1u);
+    ASSERT_EQ(world.asteroidCount(), ast::World::kAsteroidsFirstWave);
+    EXPECT_EQ(countOfSize(world, ast::AsteroidSize::Large), ast::World::kAsteroidsFirstWave);
+
+    // Nenhuma rocha nasce em cima da nave — seria uma morte inevitavel.
+    for (uint32_t i = 0; i < world.asteroidCount(); ++i)
+    {
+        const ast::Vec2 rock = world.asteroidPosition(i);
+        const float     dx = rock.x - world.shipPosition().x;
+        const float     dy = rock.y - world.shipPosition().y;
+
+        EXPECT_GT(std::sqrt(dx * dx + dy * dy), ast::World::kSpawnSafeRadius - ast::World::kShipRadius);
+    }
+}
+
+TEST(WorldTest, SameSeedGivesTheSameWave)
+{
+    const ast::World a{ ast::WorldConfig{ .seed = 42 } };
+    const ast::World b{ ast::WorldConfig{ .seed = 42 } };
+
+    ASSERT_EQ(a.asteroidCount(), b.asteroidCount());
+    for (uint32_t i = 0; i < a.asteroidCount(); ++i)
+    {
+        EXPECT_FLOAT_EQ(a.asteroidPosition(i).x, b.asteroidPosition(i).x);
+        EXPECT_FLOAT_EQ(a.asteroidPosition(i).y, b.asteroidPosition(i).y);
+    }
+}
+
+TEST(WorldTest, AsteroidsDriftAndStayInsideTheArena)
+{
+    ast::World world;
+
+    const ast::Vec2 before = world.asteroidPosition(0);
+    advance(world, 0.5);
+    const ast::Vec2 after = world.asteroidPosition(0);
+
+    EXPECT_TRUE(before.x != after.x || before.y != after.y) << "a rocha deveria estar em movimento";
+
+    // Muito tempo depois, todas continuam DENTRO da arena (deram a volta).
+    advance(world, 30.0);
+    for (uint32_t i = 0; i < world.asteroidCount(); ++i)
+    {
+        EXPECT_GE(world.asteroidPosition(i).x, 0.0f);
+        EXPECT_LT(world.asteroidPosition(i).x, ast::World::kArenaW);
+        EXPECT_GE(world.asteroidPosition(i).y, 0.0f);
+        EXPECT_LT(world.asteroidPosition(i).y, ast::World::kArenaH);
+    }
+}
+
+// --- a geometria: circulo x circulo com distancia TOROIDAL ---
+
+TEST(WorldTest, CirclesOverlapAcrossOppositeEdges)
+{
+    // Colados na borda esquerda e na direita: 10 de distancia PELA BORDA, e
+    // nao 790 como uma conta euclidiana ingenua diria. Na arena-toro eles se
+    // tocam — e e isso que faz o tiro que deu a volta acertar a rocha.
+    EXPECT_TRUE(ast::World::circlesOverlap({ 5.0f, 300.0f }, 10.0f, { 795.0f, 300.0f }, 10.0f));
+
+    // O mesmo no eixo Y (topo x fundo).
+    EXPECT_TRUE(ast::World::circlesOverlap({ 400.0f, 3.0f }, 10.0f, { 400.0f, 597.0f }, 10.0f));
+}
+
+TEST(WorldTest, CirclesDoNotOverlapWhenGenuinelyFarApart)
+{
+    // Longe pelos dois caminhos (direto e pela borda): nao ha colisao.
+    EXPECT_FALSE(ast::World::circlesOverlap({ 5.0f, 300.0f }, 10.0f, { 400.0f, 300.0f }, 10.0f));
+
+    // Encostados, mas sem se tocar (raios somam 20, distancia 21).
+    EXPECT_FALSE(ast::World::circlesOverlap({ 100.0f, 100.0f }, 10.0f, { 121.0f, 100.0f }, 10.0f));
+}
+
+TEST(WorldTest, ToroidalDeltaTakesTheShortWayThroughTheBorder)
+{
+    const ast::Vec2 delta = ast::World::toroidalDelta({ 790.0f, 300.0f }, { 10.0f, 300.0f });
+
+    EXPECT_FLOAT_EQ(delta.x, 20.0f) << "o caminho curto atravessa a borda direita";
+    EXPECT_FLOAT_EQ(delta.y, 0.0f);
+}
+
+// --- fragmentacao: arena montada pelo teste, sem depender do sorteio ---
+
+namespace {
+
+// Uma arena com UMA rocha parada bem na mira da nave (que nasce no centro,
+// apontando para cima). Assim o tiro acerta em ~0.2s, sem perseguicao.
+ast::World worldWithTargetAhead(const ast::AsteroidSize size)
+{
+    ast::World world{ ast::WorldConfig{ .spawnAsteroids = false } };
+
+    world.addAsteroid({ ast::World::kArenaW * 0.5f, ast::World::kArenaH * 0.5f - 120.0f }, {}, size);
+    return world;
+}
+
+// Avanca ate o tiro sumir (acertou ou expirou).
+void advanceUntilShotGone(ast::World& world)
+{
+    for (int i = 0; i < 200 && world.shotCount() > 0; ++i)
+    {
+        world.update(kStep);
+    }
+}
+
+} // namespace
+
+TEST(WorldTest, ShotSplitsLargeAsteroidIntoTwoMediums)
+{
+    ast::World world = worldWithTargetAhead(ast::AsteroidSize::Large);
+
+    ASSERT_TRUE(world.fire());
+    advanceUntilShotGone(world);
+
+    EXPECT_EQ(world.asteroidCount(), 2u);
+    EXPECT_EQ(countOfSize(world, ast::AsteroidSize::Medium), 2u);
+    EXPECT_EQ(countOfSize(world, ast::AsteroidSize::Large), 0u);
+}
+
+TEST(WorldTest, ShotSplitsMediumAsteroidIntoTwoSmalls)
+{
+    ast::World world = worldWithTargetAhead(ast::AsteroidSize::Medium);
+
+    ASSERT_TRUE(world.fire());
+    advanceUntilShotGone(world);
+
+    EXPECT_EQ(world.asteroidCount(), 2u);
+    EXPECT_EQ(countOfSize(world, ast::AsteroidSize::Small), 2u);
+}
+
+TEST(WorldTest, SmallAsteroidIsDestroyedInsteadOfSplitting)
+{
+    ast::World world = worldWithTargetAhead(ast::AsteroidSize::Small);
+
+    ASSERT_TRUE(world.fire());
+    advanceUntilShotGone(world);
+
+    EXPECT_EQ(world.asteroidCount(), 0u) << "a menor some de vez, nao se parte";
+}
+
+TEST(WorldTest, ShotIsConsumedByTheAsteroidItHits)
+{
+    ast::World world = worldWithTargetAhead(ast::AsteroidSize::Large);
+
+    ASSERT_TRUE(world.fire());
+
+    // Roda so ate o impacto: o tiro sumiu porque ACERTOU, nao porque expirou.
+    for (int i = 0; i < 200 && world.asteroidCount() == 1; ++i)
+    {
+        world.update(kStep);
+    }
+
+    ASSERT_EQ(world.asteroidCount(), 2u) << "a rocha deveria ter se partido";
+    EXPECT_EQ(world.shotCount(), 0u) << "o tiro morre no impacto";
+}
+
+TEST(WorldTest, FragmentsAreBornWhereTheParentDied)
+{
+    ast::World world = worldWithTargetAhead(ast::AsteroidSize::Large);
+
+    const ast::Vec2 parent = world.asteroidPosition(0);
+
+    ASSERT_TRUE(world.fire());
+    for (int i = 0; i < 200 && world.asteroidCount() == 1; ++i)
+    {
+        world.update(kStep);
+    }
+
+    ASSERT_EQ(world.asteroidCount(), 2u);
+    for (uint32_t i = 0; i < 2; ++i)
+    {
+        const ast::Vec2 fragment = world.asteroidPosition(i);
+        const ast::Vec2 delta = ast::World::toroidalDelta(parent, fragment);
+
+        // Nasceram na mae e ja andaram um quadro — nao mais que isso.
+        EXPECT_LT(std::sqrt(delta.x * delta.x + delta.y * delta.y), 10.0f);
+    }
+}
+
+// --- ondas ---
+
+TEST(WorldTest, ClearingTheArenaSpawnsABiggerNextWave)
+{
+    ast::World world;
+
+    ASSERT_EQ(world.wave(), 1u);
+    ASSERT_EQ(world.asteroidCount(), ast::World::kAsteroidsFirstWave);
+
+    world.clearAsteroids();
+    world.update(kStep);
+
+    EXPECT_EQ(world.wave(), 2u);
+    EXPECT_EQ(world.asteroidCount(), ast::World::kAsteroidsFirstWave + 1) << "cada onda traz uma rocha a mais";
+    EXPECT_EQ(countOfSize(world, ast::AsteroidSize::Large), ast::World::kAsteroidsFirstWave + 1)
+        << "a onda nova nasce so de rochas grandes";
+}
+
+TEST(WorldTest, WaveSizeIsCapped)
+{
+    ast::World world;
+
+    // Limpa a arena varias vezes: a onda cresce, mas nao passa do teto.
+    for (uint32_t i = 0; i < 20; ++i)
+    {
+        world.clearAsteroids();
+        world.update(kStep);
+
+        EXPECT_LE(world.asteroidCount(), ast::World::kMaxAsteroidsPerWave);
+    }
+
+    EXPECT_EQ(world.asteroidCount(), ast::World::kMaxAsteroidsPerWave);
+}
+
+// --- nave x rocha ---
+
+TEST(WorldTest, ShipStartsInvulnerableAndBecomesVulnerable)
+{
+    ast::World world = shipOnlyWorld();
+
+    EXPECT_TRUE(world.shipInvulnerable()) << "a nave nasce protegida";
+
+    advance(world, ast::World::kSpawnInvulnerability + kStep);
+
+    EXPECT_FALSE(world.shipInvulnerable());
+}
+
+TEST(WorldTest, InvulnerableShipIgnoresAsteroids)
+{
+    ast::World world{ ast::WorldConfig{ .spawnAsteroids = false } };
+
+    // Rocha EM CIMA da nave, enquanto a protecao inicial dura.
+    world.addAsteroid(world.shipPosition(), {}, ast::AsteroidSize::Large);
+    ASSERT_TRUE(world.shipInvulnerable());
+
+    advance(world, ast::World::kSpawnInvulnerability - 2 * kStep);
+
+    EXPECT_EQ(world.shipHits(), 0u) << "protegida: a rocha atravessa a nave";
+    EXPECT_EQ(world.asteroidCount(), 1u) << "e a rocha continua inteira";
+}
+
+TEST(WorldTest, AsteroidHittingTheShipRespawnsItAtTheCenter)
+{
+    ast::World world{ ast::WorldConfig{ .spawnAsteroids = false } };
+
+    // Nave sobe; a rocha parada esta no caminho. Espera a protecao acabar.
+    advance(world, ast::World::kSpawnInvulnerability + kStep);
+    ASSERT_FALSE(world.shipInvulnerable());
+
+    world.addAsteroid({ ast::World::kArenaW * 0.5f, ast::World::kArenaH * 0.5f - 100.0f }, {},
+                      ast::AsteroidSize::Large);
+
+    world.setThrust(true);
+    for (int i = 0; i < 200 && world.shipHits() == 0; ++i)
+    {
+        world.update(kStep);
+    }
+
+    ASSERT_EQ(world.shipHits(), 1u) << "a nave deveria ter batido na rocha";
+
+    // Batida: volta ao centro, parada, apontando para cima e protegida.
+    EXPECT_FLOAT_EQ(world.shipPosition().x, ast::World::kArenaW * 0.5f);
+    EXPECT_FLOAT_EQ(world.shipPosition().y, ast::World::kArenaH * 0.5f);
+    EXPECT_FLOAT_EQ(speedOf(world.shipVelocity()), 0.0f);
+    EXPECT_FLOAT_EQ(world.shipAngle(), 0.0f);
+    EXPECT_TRUE(world.shipInvulnerable());
+
+    // A rocha tambem se parte na batida — senao a nave renasceria e a rocha
+    // grande continuaria vindo em cima dela.
+    EXPECT_EQ(countOfSize(world, ast::AsteroidSize::Medium), 2u);
 }
