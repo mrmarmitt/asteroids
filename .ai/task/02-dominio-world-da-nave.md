@@ -1,6 +1,6 @@
 # 02 - Dominio: World da nave
 
-- **Status:** in-progress (suite verde; falta a validacao jogavel)
+- **Status:** done (2026-07-14 — validado jogando pelo usuario)
 - **Prioridade:** alta - e o coracao do jogo; tudo (asteroides, colisao,
   pontuacao) pendura no World.
 - **Categoria:** Dominio
@@ -63,5 +63,12 @@ estiver clara.
       heranca de velocidade, clamp do eixo, dt nao-positivo).
 - [x] Build MSBuild verde (Release|x64) com o World compilado no vcxproj.
 - [x] `src/asteroids/` sem nenhum include do The-Forge ou da cengine no World.
-- [ ] Validacao jogavel: a nave gira, acelera com inercia, da a volta pelas
+- [x] Validacao jogavel: a nave gira, acelera com inercia, da a volta pelas
       bordas e atira; ESC volta ao menu.
+
+Validado jogando em 2026-07-14: o "sentir" dos controles ficou fiel ao arcade
+e as constantes do topo do World.h NAO precisaram de ajuste. O wrap dos TIROS
+(e nao so o da nave) foi conferido e confirmado como desejado — e o
+comportamento do jogo original: da para se acertar pela borda oposta. O tiro
+nunca fecha uma volta completa (kShotSpeed x kShotLife da ~70% da largura da
+arena antes de expirar).

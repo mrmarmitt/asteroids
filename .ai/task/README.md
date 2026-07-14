@@ -9,7 +9,7 @@ consumidor de validacao da cengine 0.6.0 e do platform-theforge-common 0.1.0
 | # | Task | Status | Categoria |
 |---|------|--------|-----------|
 | 01 | [Bootstrap do casco](01-bootstrap-casco.md) | done | Plataforma |
-| 02 | [Dominio: World da nave](02-dominio-world-da-nave.md) | in-progress | Dominio |
+| 02 | [Dominio: World da nave](02-dominio-world-da-nave.md) | done | Dominio |
 
 ## Backlog (tasks a abrir quando chegarem)
 
