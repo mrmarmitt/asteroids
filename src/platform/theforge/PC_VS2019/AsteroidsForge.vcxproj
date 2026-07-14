@@ -41,8 +41,9 @@
     <ClCompile Include="..\src\AsteroidsForge\scene\ForgeSplashScene.cpp" />
     <ClCompile Include="..\src\AsteroidsForge\scene\ForgeMenuScene.cpp" />
     <ClCompile Include="..\src\AsteroidsForge\scene\ForgeGameScene.cpp" />
-    <!-- dominio do jogo: header-only neste degrau (GameRouter herda o
-         FlowRouter da cengine; estados inline) — nada a compilar ainda -->
+    <!-- dominio do jogo (C++ puro; o mesmo World que a suite CMake exercita —
+         GameRouter/estados seguem header-only) -->
+    <ClCompile Include="$(GameRoot)src\asteroids\game\World.cpp" />
     <!-- cengine (core + routing) -->
     <ClCompile Include="$(CengineRoot)core\src\EngineManager.cpp" />
     <ClCompile Include="$(CengineRoot)modules\routing\src\GameManager.cpp" />

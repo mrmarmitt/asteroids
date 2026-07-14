@@ -1,0 +1,33 @@
+{
+    "version": 4,
+    "configurePresets": [
+        {
+            "name": "debug",
+            "displayName": "Debug (Ninja)",
+            "description": "Dominio + testes — detecta o compilador do PATH (mesmos presets da cengine)",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/out/build/${presetName}",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "release",
+            "displayName": "Release (Ninja)",
+            "description": "Dominio + testes em release — detecta o compilador do PATH",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/out/build/${presetName}",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        }
+    ],
+    "buildPresets": [
+        { "name": "debug", "configurePreset": "debug", "jobs": 8 },
+        { "name": "release", "configurePreset": "release", "jobs": 8 }
+    ],
+    "testPresets": [
+        { "name": "debug", "configurePreset": "debug", "output": { "outputOnFailure": true } },
+        { "name": "release", "configurePreset": "release", "output": { "outputOnFailure": true } }
+    ]
+}
