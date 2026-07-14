@@ -19,10 +19,10 @@ class PlaySession;
 // Ao acabarem as vidas, a cena publica o resultado no PlaySession (que sobrevive
 // a troca de estado) e roteia para o gameOver.
 //
-// Desenho ainda por TEXTO (o batcher de sprites segue desligado): a nave e um
-// triangulo de pontos rotacionado pelo angulo do World e as rochas sao aneis de
-// pontos — o suficiente para jogar, sem decidir ainda como o asteroids sera
-// renderizado de verdade (ver task 02).
+// Desenho em WIREFRAME (forgeline, do platform-theforge-common): nave, rochas e
+// tiros sao geometria, nao sprite — como no arcade vetorial original. O batcher
+// de SPRITES continua desligado: nao ha atlas de arte neste jogo, e nao vai
+// haver (decisao da task 06).
 class ForgeGameScene final: public cengine::core::IScene
 {
     std::shared_ptr<GameRouter>  m_gameRouter;
@@ -35,6 +35,10 @@ class ForgeGameScene final: public cengine::core::IScene
 
     /// Projeta um ponto da arena do World (800x600) para pixels da tela.
     [[nodiscard]] ast::Vec2 toScreen(ast::Vec2 point) const;
+
+    /// Desenha um poligono girado/transladado, repetido nas copias do toro
+    /// (para o corpo que cruza a borda aparecer inteiro dos dois lados).
+    void drawWrapped(const ast::Vec2* shape, uint32_t count, ast::Vec2 center, float angle, uint32_t color) const;
 
 public:
     ForgeGameScene(std::shared_ptr<GameRouter> gameRouter, std::shared_ptr<PlaySession> session);

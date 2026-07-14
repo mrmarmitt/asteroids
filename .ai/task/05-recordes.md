@@ -1,6 +1,6 @@
 # 05 - Recordes
 
-- **Status:** in-progress (suite verde; falta a validacao jogavel)
+- **Status:** done (2026-07-14 — validado jogando pelo usuario)
 - **Prioridade:** media - fecha o ciclo da partida (jogar -> perder -> se ver na
   tabela -> querer de novo).
 - **Categoria:** Politica do jogo
@@ -68,6 +68,6 @@ acabou de publicar E da tabela como ela esta agora.
 - [x] Build MSBuild verde (Release|x64), sem warnings.
 - [x] Regras testadas SEM disco (repositorio de mentira) e o disco testado a
       parte — o `RecordService` nao sabe o que ha do outro lado da porta.
-- [ ] Validacao jogavel: fazer pontos, morrer, ver NOVO RECORDE, digitar o nome,
+- [x] Validacao jogavel: fazer pontos, morrer, ver NOVO RECORDE, digitar o nome,
       ver a tabela; abrir RECORDES pelo menu; fechar e reabrir o jogo e a tabela
-      continuar la.
+      continuar la. (Validado em 2026-07-14.)

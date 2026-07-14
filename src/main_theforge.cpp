@@ -99,15 +99,17 @@ int main()
 
         ForgeSceneFactory::populateForgeScenes(sceneRepositoryRef, gameRouter, session, records);
 
-        // Casco do common: fonte do The-Forge, batcher de sprites DESLIGADO
-        // (atlasPath nulo — casco so de texto neste degrau) e o preto-espaco
-        // dos irmaos como cor de clear.
+        // Casco do common: fonte do The-Forge, batcher de LINHAS ligado (o jogo
+        // e wireframe vetorial, como o arcade), batcher de SPRITES desligado
+        // (nao ha atlas de arte — e essa e a graca do wireframe), e o
+        // preto-espaco dos irmaos como cor de clear.
         TheForgeWindowDesc windowDesc = {};
         windowDesc.appName = kAppName;
         windowDesc.width = 1280;
         windowDesc.height = 720;
         windowDesc.fontPath = "TitilliumText/TitilliumText-Bold.otf";
         windowDesc.sprites.atlasPath = nullptr;
+        windowDesc.lines.enabled = true;
 
         // Modo PROPRIO por construcao (factories da cengine): a cengine dirige o
         // loop e o The-Forge entra como biblioteca atras do IWindowManager.

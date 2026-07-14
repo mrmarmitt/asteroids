@@ -19,9 +19,11 @@ nao dos numeros, para nao apodrecer. O que este jogo validou:
   menor delta no toro e so entao pergunta a engine, que nao opina sobre o
   formato do mundo.
 - **platform-theforge-common 0.1.0**: `TheForgeWindowManager`
-  (`TheForgeWindowDesc`), `forgeui` (fila de edges + `isHeld`/`heldAxis`) e
-  `forgesprite` (desligado — a cena ainda desenha tudo com texto; a escolha do
-  renderizador esta adiada, ver `.ai/task/02`).
+  (`TheForgeWindowDesc`) e `forgeui` (fila de edges + `isHeld`/`heldAxis`).
+- **platform-theforge-common 0.2.0**: `forgeline` — o batcher de LINHAS que
+  desenha este jogo. Asteroids e um arcade vetorial: nave e rochas sao
+  geometria, nao sprite. O `forgesprite` fica DESLIGADO — nao ha atlas de arte
+  neste jogo, e essa e a graca do wireframe (ver `.ai/task/06`).
 
 ## Estrutura
 

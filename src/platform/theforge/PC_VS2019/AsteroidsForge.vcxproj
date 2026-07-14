@@ -37,6 +37,7 @@
     <ClCompile Include="$(CommonRoot)src\TheForgeCommon\TheForgeWindowManager.cpp" />
     <ClCompile Include="$(CommonRoot)src\TheForgeCommon\ForgeUi.cpp" />
     <ClCompile Include="$(CommonRoot)src\TheForgeCommon\ForgeSpriteUi.cpp" />
+    <ClCompile Include="$(CommonRoot)src\TheForgeCommon\ForgeLineUi.cpp" />
     <!-- plataforma do jogo: factory + cenas -->
     <ClCompile Include="..\src\AsteroidsForge\ForgeSceneFactory.cpp" />
     <ClCompile Include="..\src\AsteroidsForge\scene\ForgeSplashScene.cpp" />
