@@ -10,7 +10,7 @@ consumidor de validacao da cengine 0.6.0 e do platform-theforge-common 0.1.0
 |---|------|--------|-----------|
 | 01 | [Bootstrap do casco](01-bootstrap-casco.md) | done | Plataforma |
 | 02 | [Dominio: World da nave](02-dominio-world-da-nave.md) | done | Dominio |
-| 03 | [Asteroides + colisao](03-asteroides-e-colisao.md) | in-progress | Dominio |
+| 03 | [Asteroides + colisao](03-asteroides-e-colisao.md) | done | Dominio |
 
 ## Backlog (tasks a abrir quando chegarem)
 

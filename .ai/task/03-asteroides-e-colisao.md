@@ -1,6 +1,6 @@
 # 03 - Asteroides + colisao
 
-- **Status:** in-progress (suite verde; falta a validacao jogavel)
+- **Status:** done (2026-07-14 — validado jogando pelo usuario)
 - **Prioridade:** alta - e o jogo virando jogo: sem rochas, so ha uma nave
   passeando.
 - **Categoria:** Dominio
@@ -92,6 +92,7 @@ novo — uma morte em cascata que o jogador nao tem como evitar.
 - [x] Gate da task 17 avaliado, corrigido pelo dono e executado: cengine 0.7.0
       publicada, com o asteroids consumindo `cengine::collision2d` e o
       wrap-around ficando no jogo.
-- [ ] Validacao jogavel: as rochas vagam e dao a volta; o tiro as parte em
+- [x] Validacao jogavel: as rochas vagam e dao a volta; o tiro as parte em
       cascata; bater numa rocha devolve a nave ao centro piscando; limpar a
-      arena traz uma onda maior.
+      arena traz uma onda maior. (Validado em 2026-07-14, ja sobre a cengine
+      0.7.0 — nenhuma constante precisou de ajuste.)
