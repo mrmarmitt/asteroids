@@ -8,7 +8,7 @@ consumidor de validacao da cengine 0.6.0 e do platform-theforge-common 0.1.0
 
 | # | Task | Status | Categoria |
 |---|------|--------|-----------|
-| 01 | [Bootstrap do casco](01-bootstrap-casco.md) | in-progress | Plataforma |
+| 01 | [Bootstrap do casco](01-bootstrap-casco.md) | done | Plataforma |
 
 ## Backlog (tasks a abrir quando chegarem)
 

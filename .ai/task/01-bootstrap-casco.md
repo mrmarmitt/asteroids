@@ -1,6 +1,6 @@
 # 01 - Bootstrap do casco (The-Forge + cengine 0.6.0 + common 0.1.0)
 
-- **Status:** in-progress
+- **Status:** done (2026-07-14 — validado jogando pelo usuario)
 - **Prioridade:** alta - nada existe sem o casco; e tambem o aceite real
   pendente de dois releases (cengine 0.6.0 e platform-theforge-common 0.1.0).
 - **Categoria:** Plataforma
@@ -44,9 +44,14 @@ O placeholder do game valida o input segurado do common (`heldAxis`): uma
 
 ## Criterios de Aceite
 
-- [ ] Build MSBuild verde (Debug|x64) com os tres repos irmaos.
-- [ ] Fluxo completo jogavel: splash -> menu -> game -> menu -> exit, janela
+- [x] Build MSBuild verde com os tres repos irmaos (Release|x64 — o
+      The-Forge desta maquina so tem as libs Release buildadas).
+- [x] Fluxo completo jogavel: splash -> menu -> game -> menu -> exit, janela
       fecha limpa (cleanup sem crash/leak report do The-Forge).
-- [ ] Nave-texto move com setas SEGURADAS no placeholder (heldAxis do
+- [x] Nave-texto move com setas SEGURADAS no placeholder (heldAxis do
       common validado).
-- [ ] Nenhum include do The-Forge em `src/asteroids/` (dominio puro).
+- [x] Nenhum include do The-Forge em `src/asteroids/` (dominio puro).
+
+Validacao jogavel feita pelo usuario em 2026-07-14. Este aceite tambem fecha
+o aceite real pendente da cengine 0.6.0 (owned() + FlowRouter em consumidor
+vivo) e do platform-theforge-common 0.1.0 (primeiro consumidor visual).
