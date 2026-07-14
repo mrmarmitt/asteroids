@@ -14,8 +14,9 @@
   .cpp compilados aqui + FSL apontando para a Shaders.list de la.
 
   Pre-requisitos: solution Unit_Tests do The-Forge buildada na mesma
-  Configuration e checkouts irmaos ../cengine (>= 0.6.0, factories
-  owned()/hosted() + FlowRouter) e ../platform-theforge-common (>= 0.1.0).
+  Configuration e checkouts irmaos ../cengine (>= 0.7.0, factories
+  owned()/hosted() + FlowRouter + collision2d) e ../platform-theforge-common
+  (>= 0.1.0).
 -->
 <Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">

@@ -8,6 +8,10 @@ Terceiro jogo do ecossistema (depois de 8puzzle e spaceinvaders — congelados
 como documentacao viva, ADR 0003 da cengine) e o **consumidor de validacao**
 das versoes novas:
 
+A versao exata da cengine usada esta no **pin do `CMakeLists.txt`** (hoje
+`0.7.1`) — e a unica fonte da verdade; o resto do repo fala das *capacidades*,
+nao dos numeros, para nao apodrecer. O que este jogo validou:
+
 - **cengine 0.6.0**: `EngineManager::owned()` (modo proprio, sem nullptr) e
   `FlowRouter<TFlow>` (mecanica da fachada de navegacao).
 - **cengine 0.7.x**: `cengine::collision2d` — a DETECCAO circulo x circulo. O

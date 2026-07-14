@@ -4,7 +4,7 @@
 // Diferente dos irmaos (8puzzle/spaceinvaders, que carregavam uma copia da
 // mecanica), aqui so existe o VOCABULARIO: a mecanica (guardar o router,
 // castar o estado atual, delegar o agendamento) vem do FlowRouter da
-// cengine 0.6.0 (task 19 de la — este jogo e o primeiro consumidor).
+// cengine (FlowRouter, task 19 de la — este jogo e o primeiro consumidor).
 
 #include <cengine/routing/FlowRouter.hpp>
 

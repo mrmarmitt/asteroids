@@ -3,8 +3,9 @@
 // irmaos 8puzzle/spaceinvaders): o main vive fora da plataforma e do pacote
 // do jogo, e e onde todas as instancias e injecoes principais acontecem.
 //
-// Primeiro consumidor do desenho 0.6.0 da cengine e do 0.1.0 do
-// platform-theforge-common:
+// Consumidor de validacao da cengine (owned() + FlowRouter desde a 0.6.0,
+// collision2d desde a 0.7.0) e do platform-theforge-common. A versao exata vive
+// no pin do CMakeLists / nos checkouts irmaos — nao em comentario:
 //
 //   main()
 //     -> initMemAlloc/initFileSystem/initLog   subsistemas de processo (na
@@ -101,7 +102,7 @@ int main()
         windowDesc.fontPath = "TitilliumText/TitilliumText-Bold.otf";
         windowDesc.sprites.atlasPath = nullptr;
 
-        // Modo PROPRIO por construcao (cengine 0.6.0): a cengine dirige o
+        // Modo PROPRIO por construcao (factories da cengine): a cengine dirige o
         // loop e o The-Forge entra como biblioteca atras do IWindowManager.
         auto engine = cengine::core::EngineManager::owned(
             std::make_unique<TheForgeWindowManager>(windowDesc),

@@ -16,8 +16,11 @@ void ForgeSplashScene::draw()
     const float h = forgeui::screenHeight();
 
     forgeui::drawTextCentered("A S T E R O I D S", h * 0.30f, 64.0f, forgeui::color::kTitle);
-    forgeui::drawTextCentered("cengine 0.6.0 + platform-theforge-common 0.1.0", h * 0.42f, 20.0f,
-                              forgeui::color::kDim);
+
+    // Sem numero de versao aqui de proposito: a linha dizia "cengine 0.6.0" e
+    // apodreceu em um dia (o jogo ja roda na 0.7.1). Versao tem UMA fonte da
+    // verdade — o pin do CMakeLists — e nao uma copia numa string de tela.
+    forgeui::drawTextCentered("cengine + platform-theforge-common", h * 0.42f, 20.0f, forgeui::color::kDim);
 
     // piscar dirigido pelo tempo de simulacao (update com dt fixo)
     if (std::fmod(m_elapsed, 1.2) < 0.8)
