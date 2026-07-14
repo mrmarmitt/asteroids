@@ -22,19 +22,19 @@
 // suave freia a nave quando o thrust solta — sem ele a nave fica ingovernavel
 // e o jogo vira um teste de paciencia. A velocidade satura em kMaxSpeed.
 //
-// Colisao: circulo x circulo com distancia TOROIDAL (a arena da wrap, entao
-// dois corpos em bordas opostas estao perto de verdade). Fica aqui, no jogo, e
-// nao na cengine — o gate da task 17 da engine foi avaliado e reprovado
-// (ADR 0002: o unico outro consumidor, o spaceinvaders, esta congelado e usa
-// AABB, forma que nao serve aqui).
+// Colisao: a DETECCAO (circulo x circulo) e da engine —
+// `cengine::collision2d::intersects` — mas o TORO e nosso. Arena que da a volta
+// e politica do jogo: calculamos o menor delta na nossa topologia e perguntamos
+// a engine com a posicao ja corrigida. A engine nao tem (nem deve ter) opiniao
+// sobre o formato do mundo. Ver a Emenda 1 da ADR 0002 da cengine.
+
+#include <cengine/collision2d/Shapes.hpp>
 
 namespace ast {
 
-struct Vec2
-{
-    float x = 0.0f;
-    float y = 0.0f;
-};
+/// O ponto 2D do jogo e o da engine: um alias, nao uma copia — assim uma posicao
+/// do World entra direto num `Circle` da colisao, sem conversao nem espelho.
+using Vec2 = cengine::collision2d::Vec2;
 
 /// O tamanho de uma rocha define raio, velocidade e no que ela se parte.
 enum class AsteroidSize : uint8_t
@@ -136,14 +136,15 @@ public:
     /// rocha a mais.
     [[nodiscard]] uint32_t wave() const { return m_wave; }
 
-    // --- geometria (publica: e o que os testes cobrem, e e o que um dia
-    //     viraria `cengine::collision2d` — hoje reprovado no gate da task 17) ---
+    // --- a topologia da arena: o pedaco que a engine NAO sabe ---
 
     /// Menor vetor de `from` ate `to` NA ARENA-TORO: atravessar a borda pode
-    /// ser o caminho curto. E o que faz a colisao funcionar em quem deu a volta.
+    /// ser o caminho curto. E o que faz a colisao funcionar em quem deu a volta
+    /// — e e POLITICA DO JOGO (a cengine nao opina sobre o formato do mundo).
     [[nodiscard]] static Vec2 toroidalDelta(Vec2 from, Vec2 to);
 
-    /// Circulos se tocam? (distancia toroidal, sem raiz quadrada)
+    /// Circulos se tocam na arena-toro? Corrige a posicao de `b` pelo menor
+    /// delta e delega a DETECCAO para `cengine::collision2d::intersects`.
     [[nodiscard]] static bool circlesOverlap(Vec2 a, float radiusA, Vec2 b, float radiusB);
 
     // --- ganchos de teste (mesmo padrao do killInvader do spaceinvaders):

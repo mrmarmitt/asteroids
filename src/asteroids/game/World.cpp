@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <cmath>
 
+#include <cengine/collision2d/Intersects.hpp>
+
 namespace ast {
 
 namespace {
@@ -235,10 +237,14 @@ void World::collideShipWithAsteroids()
 
 bool World::circlesOverlap(const Vec2 a, const float radiusA, const Vec2 b, const float radiusB)
 {
-    const Vec2  delta = toroidalDelta(a, b);
-    const float reach = radiusA + radiusB;
+    // O toro e nosso: reposicionamos `b` no ponto equivalente MAIS PROXIMO de
+    // `a` (que pode estar do outro lado da borda)...
+    const Vec2 delta = toroidalDelta(a, b);
+    const Vec2 nearest = { a.x + delta.x, a.y + delta.y };
 
-    return delta.x * delta.x + delta.y * delta.y <= reach * reach;
+    // ...e so entao perguntamos a engine, que nao sabe do wrap e nem precisa.
+    return cengine::collision2d::intersects(cengine::collision2d::Circle{ a, radiusA },
+                                            cengine::collision2d::Circle{ nearest, radiusB });
 }
 
 Vec2 World::toroidalDelta(const Vec2 from, const Vec2 to)

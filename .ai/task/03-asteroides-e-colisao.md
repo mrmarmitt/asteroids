@@ -5,8 +5,9 @@
   passeando.
 - **Categoria:** Dominio
 - **Depende de:** task 02 (World da nave).
-- **Dispara:** o gate da task 17 da cengine (`cengine::collision2d`) — avaliado
-  e REPROVADO; ver Decisoes.
+- **Dispara:** o gate da task 17 da cengine — que virou o **ciclo 0.7.0**
+  (`cengine::collision2d`, AABB + circulo) e a Emenda 1 da ADR 0002; ver
+  Decisoes.
 
 ## Contexto
 
@@ -25,9 +26,10 @@ sob tiro, e que devolvem a nave ao centro quando a acertam.
 1. `ast::World`: rochas (`AsteroidSize` Large/Medium/Small com raio e
    velocidade proprios — quanto menor, mais rapida), ondas com RNG
    deterministico (LCG por seed, como no spaceinvaders), deriva + wrap.
-2. Colisao **circulo x circulo com distancia TOROIDAL**: tiro x rocha (parte a
-   rocha, consome o tiro) e nave x rocha (parte a rocha, devolve a nave ao
-   centro com invulnerabilidade temporaria).
+2. Colisao **circulo x circulo** — deteccao via `cengine::collision2d`, com a
+   correcao TOROIDAL feita aqui: tiro x rocha (parte a rocha, consome o tiro) e
+   nave x rocha (parte a rocha, devolve a nave ao centro com invulnerabilidade
+   temporaria).
 3. Fragmentacao: grande -> 2 medias -> 2 pequenas -> some. Fragmentos nascem
    onde a mae morreu, em direcoes sorteadas e mais rapidos.
 4. Ondas: arena limpa faz a proxima nascer, com uma rocha grande a mais (com
@@ -46,25 +48,34 @@ sob tiro, e que devolvem a nave ao centro quando a acertam.
 
 ## Decisoes
 
-**O gate da cengine (task 17) foi avaliado e REPROVADO — a colisao fica no
-jogo.** O criterio 2 da ADR 0002 exige >= 2 consumidores reais, e o candidato
-falha por dois motivos que so apareceram com o consumidor na mao:
+**A DETECCAO subiu para a cengine 0.7.0; o TORO ficou aqui.**
 
-1. O consumidor que justificava a promocao **nao e mais um consumidor**: o
-   spaceinvaders esta congelado na 0.5.0 (ADR 0003) e nunca vai linkar o
-   modulo. A evidencia dele e historica, nao viva.
-2. A forma que ele evidencia (**AABB**) **nao serve aqui**: rocha e nave sao
-   redondas, e a arena e um toro — o asteroids precisa de **circulo com
-   distancia toroidal**, que tem zero evidencia previa. Promove-lo seria a
-   especulacao que a ADR 0002 proibe.
+Historico honesto do gate: numa primeira leitura eu REPROVEI a promocao,
+entendendo o criterio 2 da ADR 0002 ("≥ 2 consumidores reais") como "dois jogos
+que vao LINKAR o modulo" — e o spaceinvaders, congelado (ADR 0003), nunca vai.
+O dono do projeto corrigiu a regra: **congelar um jogo suspende a manutencao
+dele, nao o aprendizado que ele produziu**. Sem isso, "documentacao viva" (ADR
+0003) seria so abandono, e nenhuma promocao futura passaria — os dois jogos
+completos do ecossistema estao parados.
 
-Registrado na propria task 17 da cengine, com um gate novo e mais afiado:
-comecar quando um segundo jogo **VIVO** precisar de deteccao 2D.
+A **Emenda 1 da ADR 0002** oficializou a regra e cobrou um pedagio: a suite da
+engine tem de **encarnar o caso de uso do jogo congelado**. Os testes de
+`cengine::collision2d` reproduzem tiro x invasor e bomba x canhao do
+spaceinvaders — sem descongela-lo.
 
-Consequencia pratica: `toroidalDelta`/`circlesOverlap` sao publicos e estaticos
-no `World` — geometria pura, coberta por testes proprios. E exatamente o codigo
-que um dia subiria para a engine, isolado e pronto para ser extraido quando o
-gate finalmente passar.
+O recorte, que e o que importa aqui:
+
+- **Sobe (mecanismo):** as formas e a sobreposicao entre elas — `Aabb`,
+  `Circle`, `intersects()`. Circulo e AABB sao irmaos; as duas evidencias reais
+  existem.
+- **Fica (politica):** o **wrap-around**. A arena do asteroids e um toro; a do
+  spaceinvaders nao. Formato do mundo e decisao DO JOGO. O `toroidalDelta`
+  continua nosso: corrigimos a posicao pelo menor delta e so entao perguntamos
+  a engine. Promover o toro daria a cengine uma opiniao sobre o formato do
+  mundo — e e assim que uma engine vira deposito.
+
+Na pratica, `World::circlesOverlap` virou tres linhas: acha o ponto equivalente
+mais proximo no toro e delega a `cengine::collision2d::intersects`.
 
 **Colisao continua na nave protegida.** A rocha que mata tambem se parte. Sem
 isso, a nave renasceria no centro e a mesma rocha grande viria em cima dela de
@@ -76,8 +87,11 @@ novo — uma morte em cascata que o jogador nao tem como evitar.
       dos tres tamanhos, tiro consumido no impacto, fragmentos na posicao da
       mae, ondas crescendo com teto, invulnerabilidade e respawn).
 - [x] Build MSBuild verde (Release|x64), sem warnings.
-- [x] `src/asteroids/` sem nenhum include do The-Forge ou da cengine no World.
-- [x] Gate da task 17 da cengine avaliado e documentado nos dois repos.
+- [x] `src/asteroids/` sem nenhum include do The-Forge (o World usa a cengine:
+      `collision2d` para detectar, e so isso).
+- [x] Gate da task 17 avaliado, corrigido pelo dono e executado: cengine 0.7.0
+      publicada, com o asteroids consumindo `cengine::collision2d` e o
+      wrap-around ficando no jogo.
 - [ ] Validacao jogavel: as rochas vagam e dao a volta; o tiro as parte em
       cascata; bater numa rocha devolve a nave ao centro piscando; limpar a
       arena traz uma onda maior.

@@ -17,16 +17,18 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 option(ASTEROIDS_BUILD_TESTS "Build the test suite" ON)
 
 # -----------------------------
-# Dependencia: cengine 0.6.0 — o asteroids e o consumidor de validacao dela
-# (ADR 0003: os jogos anteriores ficaram estacionados na 0.5.0). O dominio
-# usa routing (GameRouter herda de FlowRouter, estados implementam IState).
+# Dependencia: cengine 0.7.0 — o asteroids e o consumidor de validacao dela
+# (ADR 0003: os jogos anteriores ficaram estacionados na 0.5.0). O dominio usa
+# routing (GameRouter herda de FlowRouter, estados implementam IState) e
+# collision2d (a deteccao circulo x circulo; o wrap-around da arena fica AQUI,
+# no jogo — a engine nao opina sobre o formato do mundo).
 # -----------------------------
 include(FetchContent)
 
 FetchContent_Declare(
   cengine
   GIT_REPOSITORY https://github.com/mrmarmitt/cengine.git
-  GIT_TAG 0.6.0
+  GIT_TAG 0.7.0
 )
 
 # Sem a suite de testes da cengine (evita fetch do GoogleTest dela).
@@ -46,6 +48,7 @@ target_include_directories(asteroids_lib PUBLIC src)
 target_link_libraries(asteroids_lib PUBLIC
     cengine::core
     cengine::routing
+    cengine::collision2d
 )
 
 # -----------------------------
