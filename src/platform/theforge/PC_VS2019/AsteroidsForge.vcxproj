@@ -43,9 +43,12 @@
     <ClCompile Include="..\src\AsteroidsForge\scene\ForgeMenuScene.cpp" />
     <ClCompile Include="..\src\AsteroidsForge\scene\ForgeGameScene.cpp" />
     <ClCompile Include="..\src\AsteroidsForge\scene\ForgeGameOverScene.cpp" />
+    <ClCompile Include="..\src\AsteroidsForge\scene\ForgeRecordsScene.cpp" />
     <!-- dominio do jogo (C++ puro; o mesmo World que a suite CMake exercita —
          GameRouter/estados seguem header-only) -->
     <ClCompile Include="$(GameRoot)src\asteroids\game\World.cpp" />
+    <ClCompile Include="$(GameRoot)src\asteroids\game\service\RecordService.cpp" />
+    <ClCompile Include="$(GameRoot)src\asteroids\game\service\repository\FileRecordRepository.cpp" />
     <!-- cengine (core + routing) -->
     <ClCompile Include="$(CengineRoot)core\src\EngineManager.cpp" />
     <ClCompile Include="$(CengineRoot)modules\routing\src\GameManager.cpp" />

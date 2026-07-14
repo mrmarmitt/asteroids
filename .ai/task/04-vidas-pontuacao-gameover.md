@@ -1,6 +1,6 @@
 # 04 - Vidas, pontuacao e gameOver
 
-- **Status:** in-progress (suite verde; falta a validacao jogavel)
+- **Status:** done (2026-07-14 — validado jogando pelo usuario)
 - **Prioridade:** alta - e o que transforma a arena numa PARTIDA (comeco, meio
   e fim).
 - **Categoria:** Dominio + Fluxo
@@ -66,6 +66,6 @@ porque o resultado precisa ATRAVESSAR essa morte.
       simulacao, vida extra no limiar).
 - [x] Build MSBuild verde (Release|x64), sem warnings.
 - [x] `shipHits()` removido do World (o andaime da task 03 saiu).
-- [ ] Validacao jogavel: HUD mostra pontos/vidas/onda; morrer 3x leva ao game
+- [x] Validacao jogavel: HUD mostra pontos/vidas/onda; morrer 3x leva ao game
       over com o placar certo; ENTER joga de novo (partida zerada) e ESC volta
-      ao menu.
+      ao menu. (Validado em 2026-07-14.)

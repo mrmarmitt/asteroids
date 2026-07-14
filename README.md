@@ -88,12 +88,16 @@ out\theforge\x64\Release\AsteroidsForge\AsteroidsForge.exe
 ## Controles
 
 - Splash: ENTER entra no menu.
-- Menu: SETAS navegam, ENTER confirma, ESC sai.
+- Menu: SETAS navegam, ENTER confirma, ESC sai (JOGAR / RECORDES / SAIR).
 - Jogo: SETAS `<-` `->` giram, SETA CIMA acelera (inercia!), ESPACO atira,
   ESC volta ao menu.
 
 A arena da a volta: nave, tiros e rochas somem por uma borda e voltam pela
 oposta.
+
+Ao acabarem as vidas, uma pontuacao que entre no top-10 pede o nome e vai para
+o `records.tsv`, gravado ao lado do executavel (arquivo texto, editavel a mao —
+e o jogo sobrevive a um arquivo torto).
 
 ## Plano
 

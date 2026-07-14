@@ -34,6 +34,8 @@
 
 #include "asteroids/game/GameRouter.h"
 #include "asteroids/game/service/PlaySession.h"
+#include "asteroids/game/service/RecordService.h"
+#include "asteroids/game/service/repository/FileRecordRepository.h"
 #include "asteroids/game/state/StateGame.h"
 
 #include "platform/theforge/src/AsteroidsForge/ForgeSceneFactory.h"
@@ -90,7 +92,12 @@ int main()
         // cena do jogo); o PlaySession e quem sobrevive para o gameOver ler.
         const auto session = std::make_shared<PlaySession>();
 
-        ForgeSceneFactory::populateForgeScenes(sceneRepositoryRef, gameRouter, session);
+        // Recordes: politica do jogo (ADR 0002 da cengine — nunca sobe para a
+        // engine). O TSV fica ao lado do exe, junto com o gpu.cfg e as fontes.
+        const auto records =
+            std::make_shared<ast::RecordService>(std::make_shared<ast::FileRecordRepository>("records.tsv"));
+
+        ForgeSceneFactory::populateForgeScenes(sceneRepositoryRef, gameRouter, session, records);
 
         // Casco do common: fonte do The-Forge, batcher de sprites DESLIGADO
         // (atlasPath nulo — casco so de texto neste degrau) e o preto-espaco

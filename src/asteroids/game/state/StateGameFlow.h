@@ -9,7 +9,7 @@ class GameRouter;
 // transicoes invalidas sao no-ops explicitos.
 //
 // O vocabulario cresce por degrau: o bootstrap tinha menu/game/exit; a task 04
-// (pontuacao/vidas) trouxe o gameOver.
+// (pontuacao/vidas) trouxe o gameOver; a task 05, os records.
 class StateGameFlow: public cengine::routing::IState
 {
 public:
@@ -22,5 +22,6 @@ public:
     virtual void menu(const GameRouter& game) const = 0;
     virtual void game(const GameRouter& game) const = 0;
     virtual void gameOver(const GameRouter& game) const = 0;
+    virtual void records(const GameRouter& game) const = 0;
     virtual void exit(const GameRouter& game) const = 0;
 };

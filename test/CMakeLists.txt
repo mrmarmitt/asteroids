@@ -18,6 +18,8 @@ FetchContent_MakeAvailable(googletest)
 # -------------------------------------------------------------
 add_executable(asteroids_tests
     "${CMAKE_CURRENT_SOURCE_DIR}/asteroids/game/WorldTest.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/asteroids/game/service/RecordServiceTest.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/asteroids/game/service/repository/FileRecordRepositoryTest.cpp"
 )
 
 target_link_libraries(asteroids_tests
