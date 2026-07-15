@@ -1,8 +1,8 @@
 # Asteroids
 
-Jogo de estudo sobre a [cengine](https://github.com/mrmarmitt/cengine) com a
+Jogo de estudo sobre a [cengine](https://github.com/cengine-dev/cengine) com a
 plataforma The-Forge via
-[platform-theforge-common](https://github.com/mrmarmitt/platform-theforge-common).
+[platform-theforge-common](https://github.com/cengine-dev/platform-theforge-common).
 
 Terceiro jogo do ecossistema (depois de 8puzzle e spaceinvaders — congelados
 como documentacao viva, ADR 0003 da cengine) e o **consumidor de validacao**
