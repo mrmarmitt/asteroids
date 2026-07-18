@@ -17,7 +17,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 option(ASTEROIDS_BUILD_TESTS "Build the test suite" ON)
 
 # -----------------------------
-# Dependencia: cengine 0.7.0 — o asteroids e o consumidor de validacao dela
+# Dependencia: cengine 0.8.0 — o asteroids e um consumidor de validacao dela
 # (ADR 0003: os jogos anteriores ficaram estacionados na 0.5.0). O dominio usa
 # routing (GameRouter herda de FlowRouter, estados implementam IState) e
 # collision2d (a deteccao circulo x circulo; o wrap-around da arena fica AQUI,

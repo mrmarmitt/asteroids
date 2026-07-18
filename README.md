@@ -9,7 +9,7 @@ como documentacao viva, ADR 0003 da cengine) e o **consumidor de validacao**
 das versoes novas:
 
 A versao exata da cengine usada esta no **pin do `CMakeLists.txt`** (hoje
-`0.7.1`) — e a unica fonte da verdade; o resto do repo fala das *capacidades*,
+`0.8.0`) — e a unica fonte da verdade; o resto do repo fala das *capacidades*,
 nao dos numeros, para nao apodrecer. O que este jogo validou:
 
 - **cengine 0.6.0**: `EngineManager::owned()` (modo proprio, sem nullptr) e
@@ -18,6 +18,9 @@ nao dos numeros, para nao apodrecer. O que este jogo validou:
   **wrap-around da arena fica aqui**, no jogo: o `World` corrige a posicao pelo
   menor delta no toro e so entao pergunta a engine, que nao opina sobre o
   formato do mundo.
+- **cengine 0.8.0**: `cengine::input` — o vocabulario e o estado do teclado
+  subiram para a engine; a ponte The-Forge continuou dona apenas da captura, e
+  as cenas do jogo migraram sem mudar seu esquema de controles.
 - **platform-theforge-common 0.1.0**: `TheForgeWindowManager`
   (`TheForgeWindowDesc`) e `forgeui` (fila de edges + `isHeld`/`heldAxis`).
 - **platform-theforge-common 0.2.0**: `forgeline` — o batcher de LINHAS que
